@@ -17,6 +17,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/*
+    Public: События
+    Публичный API для работы с событиями
+ */
 @Slf4j
 @Validated
 @RestController
@@ -46,7 +50,7 @@ public class PublicEventsController {
             @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size,
             HttpServletRequest request
     ) {
-        log.info("Public list events request received");
+        log.info("Public list events");
 
         // TODO улучшить
         statsClient.saveHit(NewHitDto.builder()

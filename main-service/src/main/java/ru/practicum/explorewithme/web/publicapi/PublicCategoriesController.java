@@ -9,6 +9,10 @@ import ru.practicum.explorewithme.service.publicapi.PublicCategoryService;
 
 import java.util.List;
 
+/*
+    Public: Категории
+    Публичный API для работы с категориями
+ */
 @Slf4j
 @Validated
 @RestController

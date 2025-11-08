@@ -9,6 +9,10 @@ import ru.practicum.explorewithme.service.publicapi.PublicCompilationService;
 
 import java.util.List;
 
+/*
+    Public: Подборки событий
+    Публичный API для работы с подборками событий
+ */
 @Slf4j
 @Validated
 @RestController
