@@ -29,3 +29,8 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Параметры запросов
     org.springframework.transaction.interceptor: TRACE  # Транзакции
     org.springframework.orm.jpa: DEBUG  # JPA операции
+
+stats-service:
+  url: ${STATS_SERVICE_URL:http://localhost:9090}
+  app-name: explore-with-me
+  collect-stats-by-years-cnt: 1

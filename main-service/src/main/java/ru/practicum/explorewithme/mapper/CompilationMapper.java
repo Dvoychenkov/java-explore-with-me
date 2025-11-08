@@ -1,10 +1,29 @@
 package ru.practicum.explorewithme.mapper;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.MappingTarget;
+import ru.practicum.explorewithme.domain.compilation.Compilation;
+import ru.practicum.explorewithme.dto.compilation.CompilationDto;
+import ru.practicum.explorewithme.dto.event.EventShortDto;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+import java.util.List;
+
+@Mapper(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        uses = EventMapper.class
+)
 public interface CompilationMapper {
 
-    // TODO
+    CompilationDto toDto(Compilation compilation);
+
+    @AfterMapping
+    default void fillEvents(Compilation compilation, @MappingTarget CompilationDto dto, EventMapper eventMapper) {
+        List<EventShortDto> list = compilation.getEvents()
+                .stream()
+                .map(eventMapper::toShortDto)
+                .toList();
+        dto.setEvents(list);
+    }
 }
