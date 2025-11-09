@@ -31,7 +31,7 @@ public class PrivateEventRequestsController {
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId
     ) {
-
+        log.info("Private find user event requests by user id: {}, event id: {}", userId, eventId);
 
         return privateEventRequestService.listEventRequests(userId, eventId);
     }
@@ -42,7 +42,7 @@ public class PrivateEventRequestsController {
             @PathVariable("eventId") Long eventId,
             @Valid @RequestBody EventRequestStatusUpdateRequest req
     ) {
-
+        log.info("Private update event statuses by user id: {}, event id: {}", userId, eventId);
 
         return privateEventRequestService.updateStatuses(userId, eventId, req);
     }

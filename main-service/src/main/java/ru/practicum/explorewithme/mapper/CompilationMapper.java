@@ -19,11 +19,11 @@ public interface CompilationMapper {
     CompilationDto toDto(Compilation compilation);
 
     @AfterMapping
-    default void fillEvents(Compilation compilation, @MappingTarget CompilationDto dto, EventMapper eventMapper) {
+    default void fillEvents(Compilation compilation, @MappingTarget CompilationDto compilationDto, EventMapper eventMapper) {
         List<EventShortDto> list = compilation.getEvents()
                 .stream()
                 .map(eventMapper::toShortDto)
                 .toList();
-        dto.setEvents(list);
+        compilationDto.setEvents(list);
     }
 }

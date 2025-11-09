@@ -21,6 +21,7 @@ import ru.practicum.explorewithme.util.QueryUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @Slf4j
@@ -60,12 +61,6 @@ public class PublicEventServiceImpl implements PublicEventService {
             jpaSort = Sort.unsorted();
         }
         Pageable pageable = QueryUtils.offsetLimit(from, size, jpaSort);
-
-//        List<Event> page = eventRepository.findAll(
-//                EventSpecifications.publicSearch(text, categories, paid, start, end),
-//                pageable
-//        ).getContent();
-
 
         Specification<Event> eventSpecification = EventSpecifications.publicSearch(text, categories, paid, start, end);
 
@@ -142,9 +137,10 @@ public class PublicEventServiceImpl implements PublicEventService {
         if (possibleDateTime == null || possibleDateTime.isBlank()) {
             return null;
         }
+
         try {
             return LocalDateTime.parse(possibleDateTime, ISO_DATE_TIME_FORMAT);
-        } catch (Exception ex) {
+        } catch (DateTimeParseException ex) {
             // TODO брать формат из шаблона?
             throw new IllegalArgumentException("start/end must match 'yyyy-MM-dd HH:mm:ss'");
         }
