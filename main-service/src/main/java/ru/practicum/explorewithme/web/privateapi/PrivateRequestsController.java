@@ -3,6 +3,7 @@ package ru.practicum.explorewithme.web.privateapi;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.dto.request.ParticipationRequestDto;
@@ -24,6 +25,7 @@ public class PrivateRequestsController {
     private final PrivateRequestService privateRequestService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto create(
             @PathVariable("userId") Long userId,
             @RequestParam("eventId") @NotNull Long eventId

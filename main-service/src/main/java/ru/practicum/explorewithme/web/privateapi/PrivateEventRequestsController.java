@@ -40,10 +40,10 @@ public class PrivateEventRequestsController {
     public EventRequestStatusUpdateResult updateStatusesForUserEventRequests(
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId,
-            @Valid @RequestBody EventRequestStatusUpdateRequest req
+            @Valid @RequestBody EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest
     ) {
         log.info("Private update event statuses by user id: {}, event id: {}", userId, eventId);
 
-        return privateEventRequestService.updateStatuses(userId, eventId, req);
+        return privateEventRequestService.updateStatuses(userId, eventId, eventRequestStatusUpdateRequest);
     }
 }

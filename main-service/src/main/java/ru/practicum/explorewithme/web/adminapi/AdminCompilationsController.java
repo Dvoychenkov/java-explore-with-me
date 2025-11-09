@@ -3,6 +3,7 @@ package ru.practicum.explorewithme.web.adminapi;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.dto.compilation.CompilationDto;
@@ -24,6 +25,7 @@ public class AdminCompilationsController {
     private final AdminCompilationService adminCompilationService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto create(
             @Valid @RequestBody NewCompilationDto newCompilationDto
     ) {
@@ -43,6 +45,7 @@ public class AdminCompilationsController {
     }
 
     @DeleteMapping("/{compilationId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
             @PathVariable Long compilationId
     ) {

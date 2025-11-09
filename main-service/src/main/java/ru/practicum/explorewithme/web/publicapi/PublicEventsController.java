@@ -5,11 +5,13 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
 import ru.practicum.explorewithme.service.publicapi.PublicEventService;
+import ru.practicum.explorewithme.util.DateTimeUtils;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.NewHitDto;
 
@@ -41,8 +43,10 @@ public class PublicEventsController {
             @RequestParam(name = "text", required = false) String text,
             @RequestParam(name = "categories", required = false) List<Long> categories,
             @RequestParam(name = "paid", required = false) Boolean paid,
-            @RequestParam(name = "rangeStart", required = false) String rangeStart,
-            @RequestParam(name = "rangeEnd", required = false) String rangeEnd,
+            @RequestParam(name = "rangeStart", required = false)
+            @DateTimeFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT) String rangeStart,
+            @RequestParam(name = "rangeEnd", required = false)
+            @DateTimeFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT) String rangeEnd,
             @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
             @RequestParam(name = "sort", required = false) String sort,
             @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,

@@ -38,6 +38,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         return userMapper.toDto(saved);
     }
 
+    @Override
+    public List<UserDto> findAllByIds(List<Long> ids) {
+        return userRepository.findAllById(ids).stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+
     @Transactional(readOnly = true)
     @Override
     public List<UserDto> findAll(Integer from, Integer size) {
