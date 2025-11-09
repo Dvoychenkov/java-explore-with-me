@@ -53,7 +53,9 @@ public class PublicEventsController {
             @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size,
             HttpServletRequest request
     ) {
-        log.info("Public list events");
+        log.info("Public list events - text: {}, categories: {}, paid: {}, rangeStart: {}, rangeEnd: {}, " +
+                        "onlyAvailable: {}, sort: {}, from: {}, size: {}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
         // TODO улучшить
         statsClient.saveHit(NewHitDto.builder()
@@ -70,7 +72,7 @@ public class PublicEventsController {
 
     @GetMapping("/{eventId}")
     public EventFullDto getEventById(
-            @PathVariable("id") Long eventId,
+            @PathVariable("eventId") Long eventId,
             HttpServletRequest request
     ) {
         log.info("Public get event details by id: {}", eventId);

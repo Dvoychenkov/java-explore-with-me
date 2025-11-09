@@ -1,5 +1,6 @@
 package ru.practicum.explorewithme.dto.compilation;
 
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 public class UpdateCompilationRequest {
 
+    @Size(max = 50)
     private String title;
+
     private Boolean pinned;
     private List<Long> events;
 }

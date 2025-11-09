@@ -8,6 +8,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.domain.event.*;
+import ru.practicum.explorewithme.domain.request.ParticipationRequestRepository;
+import ru.practicum.explorewithme.domain.request.RequestStatus;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.UpdateEventAdminRequest;
 import ru.practicum.explorewithme.mapper.EventMapper;
@@ -16,7 +18,7 @@ import ru.practicum.explorewithme.util.QueryUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.explorewithme.util.DateTimeUtils.*;
+import static ru.practicum.explorewithme.util.DateTimeUtils.fromString;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ import static ru.practicum.explorewithme.util.DateTimeUtils.*;
 public class AdminEventServiceImpl implements AdminEventService {
 
     private final EventRepository eventRepository;
+    private final ParticipationRequestRepository participationRequestRepository;
     private final EventMapper eventMapper;
 
     @Transactional(readOnly = true)
@@ -39,7 +42,14 @@ public class AdminEventServiceImpl implements AdminEventService {
         Pageable offsetLimit = QueryUtils.offsetLimit(from, size, idDescSort);
 
         return eventRepository.findAll(eventSpecification, offsetLimit)
-                .map(eventMapper::toFullDto)
+                .map(event -> {
+                    EventFullDto eventFullDto = eventMapper.toFullDto(event);
+
+                    long confirmed = participationRequestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
+                    eventFullDto.setConfirmedRequests(confirmed);
+
+                    return eventFullDto;
+                })
                 .getContent();
     }
 

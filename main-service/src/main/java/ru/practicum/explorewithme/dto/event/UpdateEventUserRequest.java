@@ -1,6 +1,8 @@
 package ru.practicum.explorewithme.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,14 +29,17 @@ public class UpdateEventUserRequest {
 
     private Long category;
 
+    @Future
     @JsonFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
     private LocationDto location;
 
     private Boolean paid;
-    private Integer participantLimit;
-    private Boolean requestModeration;
 
+    @PositiveOrZero
+    private Integer participantLimit;
+
+    private Boolean requestModeration;
     private String stateAction;
 }

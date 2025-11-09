@@ -29,7 +29,7 @@ public class AdminCategoriesController {
     public CategoryDto create(
             @Valid @RequestBody NewCategoryDto newCategoryDto
     ) {
-        log.info("Admin create category : {}", newCategoryDto);
+        log.info("Admin create category: {}", newCategoryDto);
 
         return adminCategoryService.create(newCategoryDto);
     }

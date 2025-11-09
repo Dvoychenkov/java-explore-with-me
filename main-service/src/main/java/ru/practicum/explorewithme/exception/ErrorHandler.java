@@ -53,7 +53,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> String.format("Field: %s.%nError: %s.%nValue: %s",
+                .map(fieldError -> String.format("Field: %s. Error: %s. Value: %s",
                         fieldError.getField(), fieldError.getDefaultMessage(), fieldError.getRejectedValue())
                 )
                 .findFirst()

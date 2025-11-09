@@ -13,6 +13,8 @@ import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.EventRepository;
 import ru.practicum.explorewithme.domain.event.EventState;
 import ru.practicum.explorewithme.domain.event.Location;
+import ru.practicum.explorewithme.domain.request.ParticipationRequestRepository;
+import ru.practicum.explorewithme.domain.request.RequestStatus;
 import ru.practicum.explorewithme.domain.user.User;
 import ru.practicum.explorewithme.domain.user.UserRepository;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
@@ -35,6 +37,7 @@ public class PrivateEventServiceImpl implements PrivateEventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final ParticipationRequestRepository participationRequestRepository;
     private final EventMapper eventMapper;
 
     // Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента
@@ -55,7 +58,12 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         entity.setPublishedOn(null);
 
         Event saved = eventRepository.save(entity);
-        return eventMapper.toFullDto(saved);
+        EventFullDto eventFullDto = eventMapper.toFullDto(saved);
+
+        long confirmed = participationRequestRepository.countByEventAndStatus(saved, RequestStatus.CONFIRMED);
+        eventFullDto.setConfirmedRequests(confirmed);
+
+        return eventFullDto;
     }
 
     @Transactional(readOnly = true)

@@ -1,9 +1,13 @@
 package ru.practicum.explorewithme.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.explorewithme.dto.category.CategoryDto;
+import ru.practicum.explorewithme.dto.user.UserShortDto;
+import ru.practicum.explorewithme.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
 
@@ -17,17 +21,23 @@ public class EventFullDto {
     private String title;
     private String annotation;
     private String description;
+
+    @JsonFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
+
+    @JsonFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private LocalDateTime createdOn;
+
+    @JsonFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private LocalDateTime publishedOn;
+
     private Boolean paid;
     private Integer participantLimit;
     private Boolean requestModeration;
     private String state;
     private LocationDto location;
     private Long views;
-    private Long categoryId;
-    private String categoryName;
-    private Long initiatorId;
-    private String initiatorName;
+    private CategoryDto category;
+    private UserShortDto initiator;
+    private Long confirmedRequests;
 }

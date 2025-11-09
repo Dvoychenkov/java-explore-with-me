@@ -39,7 +39,8 @@ public class AdminEventsController {
             @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size
     ) {
-        log.info("Admin list events");
+        log.info("Admin list events users: {}, states: {}, categories: {}, rangeStart: {}, rangeEnd: {}, from: {}, size: {}",
+                users, states, categories, rangeStart, rangeEnd, from, size);
 
         return adminEventService.search(users, states, categories, rangeStart, rangeEnd, from, size);
     }

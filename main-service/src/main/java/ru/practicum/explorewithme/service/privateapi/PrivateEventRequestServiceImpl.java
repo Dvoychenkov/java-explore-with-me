@@ -68,6 +68,11 @@ public class PrivateEventRequestServiceImpl implements PrivateEventRequestServic
                 event.getParticipantLimit();
         long confirmed = participationRequestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
 
+        // Лимит уже достигнут, а значит всё
+        if (confirm && limit > 0 && confirmed >= limit) {
+            throw new IllegalStateException("Participant limit has been reached");
+        }
+
         List<ParticipationRequest> participationRequestsToUpdate = participationRequestRepository
                 .findAllById(eventRequestStatusUpdateRequest.getRequestIds());
 

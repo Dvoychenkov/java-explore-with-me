@@ -23,6 +23,12 @@ spring:
     init:
       mode: always
 
+  # Для обработки даты-времени во входящих параметрах эндпоинтов
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+
 logging:
   level:
     org.hibernate.SQL: DEBUG  # Показывать запросы

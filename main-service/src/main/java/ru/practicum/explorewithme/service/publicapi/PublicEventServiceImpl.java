@@ -13,6 +13,8 @@ import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.EventRepository;
 import ru.practicum.explorewithme.domain.event.EventSpecifications;
 import ru.practicum.explorewithme.domain.event.EventState;
+import ru.practicum.explorewithme.domain.request.ParticipationRequestRepository;
+import ru.practicum.explorewithme.domain.request.RequestStatus;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
 import ru.practicum.explorewithme.mapper.EventMapper;
@@ -33,6 +35,7 @@ import static ru.practicum.explorewithme.util.DateTimeUtils.fromString;
 public class PublicEventServiceImpl implements PublicEventService {
 
     private final EventRepository eventRepository;
+    private final ParticipationRequestRepository participationRequestRepository;
     private final EventMapper eventMapper;
     private final StatsViewsService statsViewsService;
 
@@ -110,18 +113,20 @@ public class PublicEventServiceImpl implements PublicEventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event not found: " + eventId));
 
-        // TODO обработка EntityNotFoundException в @RestControllerAdvice ?
         // Cобытие должно быть опубликовано
         if (event.getState() != EventState.PUBLISHED) {
             throw new EntityNotFoundException("Event not found: " + eventId);
         }
         EventFullDto eventFullDto = eventMapper.toFullDto(event);
 
+        long confirmed = participationRequestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
+        eventFullDto.setConfirmedRequests(confirmed);
+
         Map<String, Long> views = statsViewsService.fetchViews(
                 event.getPublishedOn() != null ? event.getPublishedOn() : event.getCreatedOn(),
                 LocalDateTime.now(),
                 List.of(EVENTS_URL_PREFIX + event.getId()),
-                false
+                true
         );
 
         eventFullDto.setViews(views.getOrDefault(EVENTS_URL_PREFIX + event.getId(), 0L));

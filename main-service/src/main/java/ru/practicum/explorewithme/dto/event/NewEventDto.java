@@ -1,10 +1,8 @@
 package ru.practicum.explorewithme.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,10 +37,14 @@ public class NewEventDto {
     @JsonFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
+    @Valid
     @NotNull
     private LocationDto location;
 
-    private Boolean paid = true;
+    private Boolean paid = false;
+
+    @PositiveOrZero
     private Integer participantLimit = 0;
+
     private Boolean requestModeration = true;
 }

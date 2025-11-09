@@ -33,11 +33,11 @@ public class PrivateEventsController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto create(
             @PathVariable("userId") Long userId,
-            @Valid @RequestBody NewEventDto dto
+            @Valid @RequestBody NewEventDto newEventDto
     ) {
-        log.info("Private create event by user id: {}", userId);
+        log.info("Private create event by user id: {}, event: {}", userId, newEventDto);
 
-        return privateEventService.create(userId, dto);
+        return privateEventService.create(userId, newEventDto);
     }
 
     @GetMapping
@@ -46,7 +46,7 @@ public class PrivateEventsController {
             @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size
     ) {
-        log.info("Private list user events info by user id: {}", userId);
+        log.info("Private list user events info by user id: {}, from: {}, size: {}", userId, from, size);
 
         return privateEventService.findUserEvents(userId, from, size);
     }
@@ -56,7 +56,7 @@ public class PrivateEventsController {
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId
     ) {
-        log.info("Private user event info by user id: {} event id: {}", userId, eventId);
+        log.info("Private user event info by user id: {}, event id: {}", userId, eventId);
 
         return privateEventService.getUserEvent(userId, eventId);
     }
@@ -65,11 +65,11 @@ public class PrivateEventsController {
     public EventFullDto update(
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId,
-            @Valid @RequestBody UpdateEventUserRequest dto
+            @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest
     ) {
-        log.info("Private update event by event id: {} user id: {}", eventId, userId);
+        log.info("Private update event by event id: {}, user id: {}, event: {}", eventId, userId, updateEventUserRequest);
 
-        return privateEventService.update(userId, eventId, dto);
+        return privateEventService.update(userId, eventId, updateEventUserRequest);
     }
 
     @PatchMapping("/{eventId}/cancel")
@@ -77,7 +77,7 @@ public class PrivateEventsController {
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId
     ) {
-        log.info("Private cancel event by event id: {} user id: {}", eventId, userId);
+        log.info("Private cancel event by event id: {}, user id: {}", eventId, userId);
 
         return privateEventService.cancel(userId, eventId);
     }

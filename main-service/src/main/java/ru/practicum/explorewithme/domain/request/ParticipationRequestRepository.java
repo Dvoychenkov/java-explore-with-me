@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
+    // TODO возможно заменить на
+    //  long countByEventIdAndStatus(Long eventId, RequestStatus status);
     long countByEventAndStatus(Event event, RequestStatus requestStatus);
 
     Optional<ParticipationRequest> findByIdAndRequesterId(Long id, Long requesterId);

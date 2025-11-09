@@ -27,7 +27,7 @@ public class PublicCategoriesController {
             @RequestParam(name = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
-        log.info("Public list categories");
+        log.info("Public list categories, from: {}, size: {}", from, size);
 
         return publicCategoryService.findAll(from, size);
     }
