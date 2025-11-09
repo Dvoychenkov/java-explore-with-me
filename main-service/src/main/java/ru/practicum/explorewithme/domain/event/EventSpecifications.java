@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 import ru.practicum.explorewithme.domain.request.ParticipationRequest;
 import ru.practicum.explorewithme.domain.request.RequestStatus;
+import ru.practicum.explorewithme.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,9 +22,7 @@ public class EventSpecifications {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> queryPredicates = new ArrayList<>();
 
-            if (start != null && end != null && start.isAfter(end)) {
-                throw new IllegalArgumentException("Start date cannot be after end date");
-            }
+            DateTimeUtils.validateDateRange(start, end);
 
             // Отбираем только опубликованные евенты
             queryPredicates.add(criteriaBuilder.equal(root.get("state"), EventState.PUBLISHED));
@@ -57,9 +56,7 @@ public class EventSpecifications {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> queryPredicates = new ArrayList<>();
 
-            if (start != null && end != null && end.isBefore(start)) {
-                throw new IllegalArgumentException("Start date cannot be after end date");
-            }
+            DateTimeUtils.validateDateRange(start, end);
 
             if (users != null && !users.isEmpty()) {
                 queryPredicates.add(root.get("initiator").get("id").in(users));

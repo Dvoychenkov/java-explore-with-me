@@ -10,11 +10,12 @@ import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static ru.practicum.explorewithme.util.DateTimeUtils.ISO_DATE_TIME_FORMATTER;
 
 @Slf4j
 @Service
@@ -24,8 +25,6 @@ public class StatsViewsServiceImpl implements StatsViewsService {
     private final StatsClient statsClient;
     private final ObjectMapper objectMapper;
 
-    private static final DateTimeFormatter ISO_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     // TODO return ViewStatsDto?
     @Override
     public Map<String, Long> fetchViews(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
@@ -34,8 +33,8 @@ public class StatsViewsServiceImpl implements StatsViewsService {
         }
 
         // TODO url encode?
-        String startStr = start.format(ISO_DATE_TIME_FORMAT);
-        String endStr = end.format(ISO_DATE_TIME_FORMAT);
+        String startStr = start.format(ISO_DATE_TIME_FORMATTER);
+        String endStr = end.format(ISO_DATE_TIME_FORMATTER);
 
         // TODO add try catch?
         ResponseEntity<Object> getStatsResponse = statsClient.getStats(startStr, endStr, uris, unique);

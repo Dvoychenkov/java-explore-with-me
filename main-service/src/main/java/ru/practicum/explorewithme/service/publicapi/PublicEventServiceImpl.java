@@ -17,12 +17,14 @@ import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
 import ru.practicum.explorewithme.mapper.EventMapper;
 import ru.practicum.explorewithme.stats.StatsViewsService;
+import ru.practicum.explorewithme.util.DateTimeUtils;
 import ru.practicum.explorewithme.util.QueryUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
+
+import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
+import static ru.practicum.explorewithme.util.DateTimeUtils.fromString;
 
 @Slf4j
 @Service
@@ -37,20 +39,13 @@ public class PublicEventServiceImpl implements PublicEventService {
     @Value("${stats-service.collect-stats-by-years-cnt}")
     private int collectStatsByYearsCnt;
 
-    private static final DateTimeFormatter ISO_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    // TODO вынести в константы
-    private static final String EVENTS_URL_PREFIX = "/events/";
-
     @Override
     public List<EventShortDto> search(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
                                       Boolean onlyAvailable, String sort, Integer from, Integer size) {
 
-        LocalDateTime start = parseOrNull(rangeStart);
-        LocalDateTime end = parseOrNull(rangeEnd);
-        // TODO вынести проверку дат в утилиту?
-        if (start != null && end != null && end.isBefore(start)) {
-            throw new IllegalArgumentException("end must not be before start");
-        }
+        LocalDateTime start = fromString(rangeStart);
+        LocalDateTime end = fromString(rangeEnd);
+        DateTimeUtils.validateDateRange(start, end);
 
         Sort jpaSort;
         // TODO вынести строки сортировки в enum
@@ -89,7 +84,9 @@ public class PublicEventServiceImpl implements PublicEventService {
         LocalDateTime periodStart = (start != null) ?
                 start :
                 LocalDateTime.now().minusYears(collectStatsByYearsCnt);
-        LocalDateTime periodEnd = end != null ? end : LocalDateTime.now();
+        LocalDateTime periodEnd = (end != null) ?
+                end :
+                LocalDateTime.now();
 
         Map<String, Long> views = statsViewsService.fetchViews(periodStart, periodEnd, uris, false);
 
@@ -130,19 +127,5 @@ public class PublicEventServiceImpl implements PublicEventService {
         eventFullDto.setViews(views.getOrDefault(EVENTS_URL_PREFIX + event.getId(), 0L));
 
         return eventFullDto;
-    }
-
-    // TODO вынести в утилиту
-    private LocalDateTime parseOrNull(String possibleDateTime) {
-        if (possibleDateTime == null || possibleDateTime.isBlank()) {
-            return null;
-        }
-
-        try {
-            return LocalDateTime.parse(possibleDateTime, ISO_DATE_TIME_FORMAT);
-        } catch (DateTimeParseException ex) {
-            // TODO брать формат из шаблона?
-            throw new IllegalArgumentException("start/end must match 'yyyy-MM-dd HH:mm:ss'");
-        }
     }
 }

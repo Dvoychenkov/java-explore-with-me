@@ -14,8 +14,9 @@ import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.NewHitDto;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static ru.practicum.explorewithme.util.DateTimeUtils.ISO_DATE_TIME_FORMATTER;
 
 /*
     Public: События
@@ -34,8 +35,6 @@ public class PublicEventsController {
     @Value("${stats-service.app-name}")
     private String appName;
 
-    // TODO в общие константы
-    private static final DateTimeFormatter ISO_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @GetMapping
     public List<EventShortDto> getEvents(

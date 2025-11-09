@@ -14,9 +14,9 @@ import ru.practicum.explorewithme.mapper.EventMapper;
 import ru.practicum.explorewithme.util.QueryUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
+
+import static ru.practicum.explorewithme.util.DateTimeUtils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,15 +26,12 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
 
-    // TODO вынести в общую константу
-    private static final DateTimeFormatter ISO_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> search(List<Long> users, List<String> states, List<Long> categories,
                                      String rangeStart, String rangeEnd, Integer from, Integer size) {
-        LocalDateTime start = parseOrNull(rangeStart);
-        LocalDateTime end = parseOrNull(rangeEnd);
+        LocalDateTime start = fromString(rangeStart);
+        LocalDateTime end = fromString(rangeEnd);
 
         Specification<Event> eventSpecification = EventSpecifications.adminSearch(users, states, categories, start, end);
 
@@ -105,19 +102,5 @@ public class AdminEventServiceImpl implements AdminEventService {
 
         Event saved = eventRepository.save(event);
         return eventMapper.toFullDto(saved);
-    }
-
-    // TODO вынести в утилиту
-    private LocalDateTime parseOrNull(String possibleDateTime) {
-        if (possibleDateTime == null || possibleDateTime.isBlank()) {
-            return null;
-        }
-
-        try {
-            return LocalDateTime.parse(possibleDateTime, ISO_DATE_TIME_FORMAT);
-        } catch (DateTimeParseException ex) {
-            // TODO брать формат из шаблона?
-            throw new IllegalArgumentException("start/end must match 'yyyy-MM-dd HH:mm:ss'");
-        }
     }
 }

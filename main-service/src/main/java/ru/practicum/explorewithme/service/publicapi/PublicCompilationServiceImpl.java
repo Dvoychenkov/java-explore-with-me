@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -32,9 +34,6 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
 
     @Value("${stats-service.collect-stats-by-years-cnt}")
     private int collectStatsByYearsCnt;
-
-    // TODO вынести в константы
-    private static final String EVENTS_URL_PREFIX = "/events/";
 
     @Override
     public List<CompilationDto> findAll(Boolean pinned, int from, int size) {
@@ -63,7 +62,7 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
         return compilationDto;
     }
 
-    // Собираем все URI /events/{id} из событий всех подборок
+    // Собираем все URI из событий всех подборок
     private void injectViews(List<CompilationDto> compilationDtos) {
         List<String> uris = new ArrayList<>();
         for (CompilationDto compilationDto : compilationDtos) {
