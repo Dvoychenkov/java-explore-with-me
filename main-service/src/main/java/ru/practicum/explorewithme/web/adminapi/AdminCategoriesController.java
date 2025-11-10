@@ -29,7 +29,7 @@ public class AdminCategoriesController {
     public CategoryDto create(
             @Valid @RequestBody NewCategoryDto newCategoryDto
     ) {
-        log.info("Admin create category: {}", newCategoryDto);
+        log.info("Admin create, params => newCategoryDto: {}", newCategoryDto);
 
         return adminCategoryService.create(newCategoryDto);
     }
@@ -39,7 +39,8 @@ public class AdminCategoriesController {
             @PathVariable Long categoryId,
             @Valid @RequestBody UpdateCategoryRequest updateCategoryRequest
     ) {
-        log.info("Admin update category id: {}, category: {}", categoryId, updateCategoryRequest);
+        log.info("Admin update category, params => categoryId: {}, updateCategoryRequest: {}",
+                categoryId, updateCategoryRequest);
 
         return adminCategoryService.update(categoryId, updateCategoryRequest);
     }
@@ -49,7 +50,7 @@ public class AdminCategoriesController {
     public void delete(
             @PathVariable Long categoryId
     ) {
-        log.info("Admin delete category id: {}", categoryId);
+        log.info("Admin delete, params => categoryId: {}", categoryId);
 
         adminCategoryService.delete(categoryId);
     }

@@ -29,7 +29,7 @@ public class AdminCompilationsController {
     public CompilationDto create(
             @Valid @RequestBody NewCompilationDto newCompilationDto
     ) {
-        log.info("Admin create compilation : {}", newCompilationDto);
+        log.info("Admin create, params => newCompilationDto : {}", newCompilationDto);
 
         return adminCompilationService.create(newCompilationDto);
     }
@@ -39,7 +39,8 @@ public class AdminCompilationsController {
             @PathVariable Long compilationId,
             @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest
     ) {
-        log.info("Admin update compilation id: {}, compilation: {}", compilationId, updateCompilationRequest);
+        log.info("Admin update compilation, params => compilationId: {}, updateCompilationRequest: {}",
+                compilationId, updateCompilationRequest);
 
         return adminCompilationService.update(compilationId, updateCompilationRequest);
     }
@@ -49,7 +50,7 @@ public class AdminCompilationsController {
     public void delete(
             @PathVariable Long compilationId
     ) {
-        log.info("Admin delete compilation id: {}", compilationId);
+        log.info("Admin delete, params => compilationId: {}", compilationId);
 
         adminCompilationService.delete(compilationId);
     }

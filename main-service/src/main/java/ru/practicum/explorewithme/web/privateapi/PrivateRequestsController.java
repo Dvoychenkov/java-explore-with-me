@@ -30,7 +30,7 @@ public class PrivateRequestsController {
             @PathVariable("userId") Long userId,
             @RequestParam("eventId") @NotNull Long eventId
     ) {
-        log.info("Private create request by user id: {}, event id: {}", userId, eventId);
+        log.info("Private create request, params => userId: {}, eventId: {}", userId, eventId);
 
         return privateRequestService.create(userId, eventId);
     }
@@ -39,7 +39,7 @@ public class PrivateRequestsController {
     public List<ParticipationRequestDto> findUserRequests(
             @PathVariable("userId") Long userId
     ) {
-        log.info("Private list events request by user id: {}", userId);
+        log.info("Private list events request, params => userId: {}", userId);
 
         return privateRequestService.findUserRequests(userId);
     }
@@ -49,7 +49,7 @@ public class PrivateRequestsController {
             @PathVariable("userId") Long userId,
             @PathVariable("requestId") Long requestId
     ) {
-        log.info("Private cancel request by user id: {}, request id : {}", userId, requestId);
+        log.info("Private cancel request, params => userId: {}, requestId: {}", userId, requestId);
 
         return privateRequestService.cancel(userId, requestId);
     }

@@ -27,14 +27,14 @@ public class PublicCategoriesController {
             @RequestParam(name = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
-        log.info("Public list categories, from: {}, size: {}", from, size);
+        log.info("Public list categories, params => from: {}, size: {}", from, size);
 
         return publicCategoryService.findAll(from, size);
     }
 
     @GetMapping("/{categoryId}")
     public CategoryDto getById(@PathVariable("categoryId") Long categoryId) {
-        log.info("Public get category by id: {}", categoryId);
+        log.info("Public get category, params => categoryId: {}", categoryId);
 
         return publicCategoryService.getById(categoryId);
     }

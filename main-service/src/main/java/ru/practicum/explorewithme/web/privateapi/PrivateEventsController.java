@@ -35,7 +35,7 @@ public class PrivateEventsController {
             @PathVariable("userId") Long userId,
             @Valid @RequestBody NewEventDto newEventDto
     ) {
-        log.info("Private create event by user id: {}, event: {}", userId, newEventDto);
+        log.info("Private create event, params => userId: {}, newEventDto: {}", userId, newEventDto);
 
         return privateEventService.create(userId, newEventDto);
     }
@@ -46,7 +46,7 @@ public class PrivateEventsController {
             @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size
     ) {
-        log.info("Private list user events info by user id: {}, from: {}, size: {}", userId, from, size);
+        log.info("Private list user events info, params => userId: {}, from: {}, size: {}", userId, from, size);
 
         return privateEventService.findUserEvents(userId, from, size);
     }
@@ -56,7 +56,7 @@ public class PrivateEventsController {
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId
     ) {
-        log.info("Private user event info by user id: {}, event id: {}", userId, eventId);
+        log.info("Private user event info, params => userId: {}, eventId: {}", userId, eventId);
 
         return privateEventService.getUserEvent(userId, eventId);
     }
@@ -67,7 +67,8 @@ public class PrivateEventsController {
             @PathVariable("eventId") Long eventId,
             @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest
     ) {
-        log.info("Private update event by event id: {}, user id: {}, event: {}", eventId, userId, updateEventUserRequest);
+        log.info("Private update event, params => eventId: {}, userId: {}, updateEventUserRequest: {}",
+                eventId, userId, updateEventUserRequest);
 
         return privateEventService.update(userId, eventId, updateEventUserRequest);
     }
@@ -77,7 +78,7 @@ public class PrivateEventsController {
             @PathVariable("userId") Long userId,
             @PathVariable("eventId") Long eventId
     ) {
-        log.info("Private cancel event by event id: {}, user id: {}", eventId, userId);
+        log.info("Private cancel event, params => eventId: {}, userId: {}", eventId, userId);
 
         return privateEventService.cancel(userId, eventId);
     }

@@ -42,7 +42,7 @@ public class AdminUsersController {
             @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,
             @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size
     ) {
-        log.info("Admin find users ids: {}, from: {}, size: {}", ids, from, size);
+        log.info("Admin find users, params => ids: {}, from: {}, size: {}", ids, from, size);
 
         if (ids != null && !ids.isEmpty()) {
             return adminUserService.findAllByIds(ids);
@@ -55,7 +55,7 @@ public class AdminUsersController {
     public void delete(
             @PathVariable Long userId
     ) {
-        log.info("Admin delete user id: {}", userId);
+        log.info("Admin delete, params => userId: {}", userId);
 
         adminUserService.delete(userId);
     }

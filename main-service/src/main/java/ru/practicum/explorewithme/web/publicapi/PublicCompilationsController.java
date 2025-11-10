@@ -28,14 +28,14 @@ public class PublicCompilationsController {
             @RequestParam(name = "from", defaultValue = "0") Integer from,
             @RequestParam(name = "size", defaultValue = "10") Integer size
     ) {
-        log.info("Public list compilations, pinned: {}, from: {}, size: {}", pinned, from, size);
+        log.info("Public list compilations, params => pinned: {}, from: {}, size: {}", pinned, from, size);
 
         return publicCompilationService.findAll(pinned, from, size);
     }
 
     @GetMapping("/{compilationId}")
     public CompilationDto getById(@PathVariable("compilationId") Long compilationId) {
-        log.info("Public get compilation by id: {}", compilationId);
+        log.info("Public get compilation, params => compilationId: {}", compilationId);
 
         return publicCompilationService.getById(compilationId);
     }
