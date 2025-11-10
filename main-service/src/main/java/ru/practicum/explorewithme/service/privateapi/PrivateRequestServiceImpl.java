@@ -49,7 +49,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
             throw new IllegalStateException("Duplicate participation request");
         }
 
-        long confirmed = participationRequestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
+        long confirmed = participationRequestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
         if (event.getParticipantLimit() != null && event.getParticipantLimit() > 0
                 && confirmed >= event.getParticipantLimit()) {
             throw new IllegalStateException("Participant limit has been reached");
@@ -78,10 +78,8 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found by id: " + userId));
 
-        return participationRequestRepository.findAllByRequesterId(userId)
-                .stream()
-                .map(participationRequestMapper::toDto)
-                .toList();
+        List<ParticipationRequest> participationRequests = participationRequestRepository.findAllByRequesterId(userId);
+        return participationRequestMapper.toDtoList(participationRequests);
     }
 
     @Override

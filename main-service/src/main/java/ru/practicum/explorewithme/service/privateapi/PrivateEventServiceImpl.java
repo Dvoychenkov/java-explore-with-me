@@ -13,14 +13,9 @@ import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.EventRepository;
 import ru.practicum.explorewithme.domain.event.EventState;
 import ru.practicum.explorewithme.domain.event.Location;
-import ru.practicum.explorewithme.domain.request.ParticipationRequestRepository;
-import ru.practicum.explorewithme.domain.request.RequestStatus;
 import ru.practicum.explorewithme.domain.user.User;
 import ru.practicum.explorewithme.domain.user.UserRepository;
-import ru.practicum.explorewithme.dto.event.EventFullDto;
-import ru.practicum.explorewithme.dto.event.EventShortDto;
-import ru.practicum.explorewithme.dto.event.NewEventDto;
-import ru.practicum.explorewithme.dto.event.UpdateEventUserRequest;
+import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.mapper.EventMapper;
 import ru.practicum.explorewithme.util.QueryUtils;
 
@@ -37,7 +32,6 @@ public class PrivateEventServiceImpl implements PrivateEventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final ParticipationRequestRepository participationRequestRepository;
     private final EventMapper eventMapper;
 
     // Дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента
@@ -58,12 +52,7 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         entity.setPublishedOn(null);
 
         Event saved = eventRepository.save(entity);
-        EventFullDto eventFullDto = eventMapper.toFullDto(saved);
-
-        long confirmed = participationRequestRepository.countByEventAndStatus(saved, RequestStatus.CONFIRMED);
-        eventFullDto.setConfirmedRequests(confirmed);
-
-        return eventFullDto;
+        return eventMapper.toFullDto(saved);
     }
 
     @Transactional(readOnly = true)
@@ -72,9 +61,8 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         Sort idDescSort = Sort.by("id").ascending();
         Pageable offsetLimit = QueryUtils.offsetLimit(from, size, idDescSort);
 
-        return eventRepository.findAllByInitiatorId(userId, offsetLimit)
-                .map(eventMapper::toShortDto)
-                .getContent();
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, offsetLimit).getContent();
+        return eventMapper.toShortDtoList(events);
     }
 
     @Transactional(readOnly = true)
@@ -98,14 +86,12 @@ public class PrivateEventServiceImpl implements PrivateEventService {
 
         // Обработка смены состояния
         if (updateEventUserRequest.getStateAction() != null) {
-            if ("CANCEL_REVIEW".equalsIgnoreCase(updateEventUserRequest.getStateAction())) {
+            if (EventStateAction.CANCEL_REVIEW.equals(updateEventUserRequest.getStateAction())) {
                 event.setState(EventState.CANCELED);
-            } else if ("SEND_TO_REVIEW".equalsIgnoreCase(updateEventUserRequest.getStateAction())) {
+            } else if (EventStateAction.SEND_TO_REVIEW.equals(updateEventUserRequest.getStateAction())) {
                 event.setState(EventState.PENDING);
             }
         }
-
-        eventMapper.updateEntity(updateEventUserRequest, event);
 
         // Ручное обновление оставшихся полей
         if (updateEventUserRequest.getEventDate() != null) {
@@ -117,12 +103,8 @@ public class PrivateEventServiceImpl implements PrivateEventService {
                     .orElseThrow(() -> new EntityNotFoundException("Category not found by id: " + updateEventUserRequest.getCategory()));
             event.setCategory(category);
         }
-        if (updateEventUserRequest.getLocation() != null) {
-            Location location = new Location();
-            location.setLat(updateEventUserRequest.getLocation().getLat());
-            location.setLon(updateEventUserRequest.getLocation().getLon());
-            event.setLocation(location);
-        }
+
+        eventMapper.updateEntity(updateEventUserRequest, event);
 
         Event saved = eventRepository.save(event);
         return eventMapper.toFullDto(saved);

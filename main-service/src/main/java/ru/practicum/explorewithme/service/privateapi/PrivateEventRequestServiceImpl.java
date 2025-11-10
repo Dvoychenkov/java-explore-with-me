@@ -42,8 +42,8 @@ public class PrivateEventRequestServiceImpl implements PrivateEventRequestServic
             throw new IllegalStateException("User is not the initiator of the event");
         }
 
-        return participationRequestRepository.findAllByEventId(eventId)
-                .stream().map(participationRequestMapper::toDto).toList();
+        List<ParticipationRequest> participationRequests = participationRequestRepository.findAllByEventId(eventId);
+        return participationRequestMapper.toDtoList(participationRequests);
     }
 
     @Override
@@ -56,17 +56,15 @@ public class PrivateEventRequestServiceImpl implements PrivateEventRequestServic
             throw new IllegalStateException("User is not the initiator of the event");
         }
 
-        // TODO по-хорошему сделать покрасивее
-        boolean confirm = "CONFIRMED".equalsIgnoreCase(eventRequestStatusUpdateRequest.getStatus());
-        boolean reject = "REJECTED".equalsIgnoreCase(eventRequestStatusUpdateRequest.getStatus());
+        boolean confirm = RequestStatus.CONFIRMED.equals(eventRequestStatusUpdateRequest.getStatus());
+        boolean reject = RequestStatus.REJECTED.equals(eventRequestStatusUpdateRequest.getStatus());
         if (!confirm && !reject) {
-            throw new IllegalArgumentException("status must be CONFIRMED or REJECTED");
+            throw new IllegalArgumentException(String.format("Status must be in '%s'",
+                    List.of(RequestStatus.CONFIRMED, RequestStatus.REJECTED)));
         }
 
-        int limit = (event.getParticipantLimit() == null) ?
-                0 :
-                event.getParticipantLimit();
-        long confirmed = participationRequestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
+        int limit = (event.getParticipantLimit() == null) ? 0 : event.getParticipantLimit();
+        long confirmed = participationRequestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
 
         // Лимит уже достигнут, а значит всё
         if (confirm && limit > 0 && confirmed >= limit) {
@@ -83,8 +81,9 @@ public class PrivateEventRequestServiceImpl implements PrivateEventRequestServic
             if (!participationRequest.getEvent().getId().equals(eventId)) {
                 throw new IllegalStateException("Request does not belong to this event");
             }
-            if (participationRequest.getStatus() != RequestStatus.PENDING) {
-                throw new IllegalStateException("Only PENDING requests can be updated");
+            if (!RequestStatus.PENDING.equals(participationRequest.getStatus())) {
+                throw new IllegalStateException(String.format("Only requests in status '%s' can be updated",
+                        RequestStatus.PENDING));
             }
 
             if (confirm) {

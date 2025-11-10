@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.domain.compilation.Compilation;
 import ru.practicum.explorewithme.domain.compilation.CompilationRepository;
+import ru.practicum.explorewithme.domain.request.EventRequestCount;
+import ru.practicum.explorewithme.domain.request.ParticipationRequestRepository;
+import ru.practicum.explorewithme.domain.request.RequestStatus;
 import ru.practicum.explorewithme.dto.compilation.CompilationDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
 import ru.practicum.explorewithme.mapper.CompilationMapper;
@@ -20,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
 
@@ -29,6 +35,7 @@ import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
 public class PublicCompilationServiceImpl implements PublicCompilationService {
 
     private final CompilationRepository compilationRepository;
+    private final ParticipationRequestRepository participationRequestRepository;
     private final CompilationMapper compilationMapper;
     private final StatsViewsService statsViewsService;
 
@@ -42,12 +49,11 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
         Page<Compilation> compilationPage = (pinned == null) ?
                 compilationRepository.findAll(offsetLimit) :
                 compilationRepository.findAllByPinned(pinned, offsetLimit);
+        List<Compilation> compilations = compilationPage.getContent();
 
-        List<CompilationDto> compilationDtos = compilationPage
-                .map(compilationMapper::toDto)
-                .getContent();
-        injectViews(compilationDtos);
+        List<CompilationDto> compilationDtos = compilationMapper.toDtoList(compilations);
 
+        injectEventStats(compilationDtos);
         return compilationDtos;
     }
 
@@ -57,34 +63,53 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
                 .orElseThrow(() -> new EntityNotFoundException("Compilation not found by id: " + id));
 
         CompilationDto compilationDto = compilationMapper.toDto(compilation);
-        injectViews(List.of(compilationDto));
 
+        injectEventStats(List.of(compilationDto));
         return compilationDto;
     }
 
-    // Собираем все URI из событий всех подборок
-    private void injectViews(List<CompilationDto> compilationDtos) {
-        List<String> uris = new ArrayList<>();
-        for (CompilationDto compilationDto : compilationDtos) {
-            for (EventShortDto eventShortDto : compilationDto.getEvents()) {
-                uris.add(EVENTS_URL_PREFIX + eventShortDto.getId());
-            }
-        }
+    private void injectEventStats(List<CompilationDto> compilationDtos) {
+        // Собираем все уникальные евенты
+        Set<EventShortDto> allEvents = compilationDtos.stream()
+                .flatMap(compilation -> compilation.getEvents().stream())
+                .collect(Collectors.toSet());
 
-        if (uris.isEmpty()) {
+        if (allEvents.isEmpty()) {
             return;
         }
 
-        LocalDateTime periodStart = LocalDateTime.now().minusYears(collectStatsByYearsCnt);
-        LocalDateTime periodEnd = LocalDateTime.now();
+        // Собираем id для batch-запросов
+        List<Long> eventIds = allEvents.stream()
+                .map(EventShortDto::getId)
+                .collect(Collectors.toList());
+        List<String> uris = eventIds.stream()
+                .map(id -> EVENTS_URL_PREFIX + id)
+                .collect(Collectors.toList());
 
-        Map<String, Long> statsViews = statsViewsService.fetchViews(periodStart, periodEnd, uris, false);
+        // Получаем подтверждённые запросы
+        List<EventRequestCount> confirmedRequestsMapList = participationRequestRepository
+                .findRequestsCountByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
+        Map<Long, Long> confirmedRequestsMap = confirmedRequestsMapList.stream()
+                .collect(Collectors.toMap(EventRequestCount::getEventId,EventRequestCount::getRequestCount));
 
-        for (CompilationDto compilationDto : compilationDtos) {
-            for (EventShortDto eventShortDto : compilationDto.getEvents()) {
-                Long viewsCnt = statsViews.getOrDefault(EVENTS_URL_PREFIX + eventShortDto.getId(), 0L);
-                eventShortDto.setViews(viewsCnt);
-            }
-        }
+        // Получаем статистику просмотров
+        Map<String, Long> viewsMap = statsViewsService.fetchViews(
+                LocalDateTime.now().minusYears(collectStatsByYearsCnt),
+                LocalDateTime.now(),
+                uris,
+                false
+        );
+
+        // Обновляем все события
+        Map<Long, EventShortDto> eventMap = allEvents.stream()
+                .collect(
+                        Collectors.toMap(EventShortDto::getId, Function.identity())
+                );
+
+        // Обогащаем евенты
+        eventMap.forEach((eventId, eventDto) -> {
+            eventDto.setConfirmedRequests(confirmedRequestsMap.getOrDefault(eventId, 0L));
+            eventDto.setViews(viewsMap.getOrDefault(EVENTS_URL_PREFIX + eventId, 0L));
+        });
     }
 }

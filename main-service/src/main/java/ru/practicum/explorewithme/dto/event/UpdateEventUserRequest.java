@@ -41,5 +41,5 @@ public class UpdateEventUserRequest {
     private Integer participantLimit;
 
     private Boolean requestModeration;
-    private String stateAction;
+    private EventStateAction stateAction;
 }

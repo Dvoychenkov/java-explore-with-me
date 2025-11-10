@@ -13,10 +13,13 @@ import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.EventRepository;
 import ru.practicum.explorewithme.domain.event.EventSpecifications;
 import ru.practicum.explorewithme.domain.event.EventState;
+import ru.practicum.explorewithme.domain.request.EventRequestCount;
 import ru.practicum.explorewithme.domain.request.ParticipationRequestRepository;
 import ru.practicum.explorewithme.domain.request.RequestStatus;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
+import ru.practicum.explorewithme.dto.event.EventSort;
+import ru.practicum.explorewithme.dto.event.PublicEventSearchCriteriaDto;
 import ru.practicum.explorewithme.mapper.EventMapper;
 import ru.practicum.explorewithme.stats.StatsViewsService;
 import ru.practicum.explorewithme.util.DateTimeUtils;
@@ -24,9 +27,9 @@ import ru.practicum.explorewithme.util.QueryUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
-import static ru.practicum.explorewithme.util.DateTimeUtils.fromString;
 
 @Slf4j
 @Service
@@ -43,69 +46,13 @@ public class PublicEventServiceImpl implements PublicEventService {
     private int collectStatsByYearsCnt;
 
     @Override
-    public List<EventShortDto> search(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
-                                      Boolean onlyAvailable, String sort, Integer from, Integer size) {
+    public List<EventShortDto> search(PublicEventSearchCriteriaDto publicEventSearchCriteriaDto) {
+        DateTimeUtils.validateDateRange(
+                publicEventSearchCriteriaDto.getRangeStart(), publicEventSearchCriteriaDto.getRangeEnd());
 
-        LocalDateTime start = fromString(rangeStart);
-        LocalDateTime end = fromString(rangeEnd);
-        DateTimeUtils.validateDateRange(start, end);
+        List<Event> events = doSearch(publicEventSearchCriteriaDto);
 
-        Sort jpaSort;
-        // TODO вынести строки сортировки в enum
-        if ("EVENT_DATE".equalsIgnoreCase(sort)) {
-            jpaSort = Sort.by(Sort.Direction.ASC, "eventDate");
-        } else {
-            // при сортировке по VIEWS — отдаём unsorted, а сортировку сделаем после подстановки просмотров
-            jpaSort = Sort.unsorted();
-        }
-        Pageable pageable = QueryUtils.offsetLimit(from, size, jpaSort);
-
-        Specification<Event> eventSpecification = EventSpecifications.publicSearch(text, categories, paid, start, end);
-
-        if (Boolean.TRUE.equals(onlyAvailable)) {
-            eventSpecification = eventSpecification.and(EventSpecifications.onlyAvailable());
-        }
-
-        List<Event> page = eventRepository.findAll(eventSpecification, pageable).getContent();
-
-        // TODO Добавить в маппер обработку листов
-        List<EventShortDto> resultEventShortDtos = new ArrayList<>(page.size());
-        for (Event event : page) {
-            resultEventShortDtos.add(eventMapper.toShortDto(event));
-        }
-
-        if (resultEventShortDtos.isEmpty()) {
-            return resultEventShortDtos;
-        }
-
-        // Получаем статистику и применяем сортировку по VIEWS при необходимости
-        List<String> uris = new ArrayList<>(resultEventShortDtos.size());
-        for (EventShortDto eventShortDto : resultEventShortDtos) {
-            uris.add(EVENTS_URL_PREFIX + eventShortDto.getId());
-        }
-
-        LocalDateTime periodStart = (start != null) ?
-                start :
-                LocalDateTime.now().minusYears(collectStatsByYearsCnt);
-        LocalDateTime periodEnd = (end != null) ?
-                end :
-                LocalDateTime.now();
-
-        Map<String, Long> views = statsViewsService.fetchViews(periodStart, periodEnd, uris, false);
-
-        for (EventShortDto eventShortDto : resultEventShortDtos) {
-            Long viewsCnt = views.getOrDefault(EVENTS_URL_PREFIX + eventShortDto.getId(), 0L);
-            eventShortDto.setViews(viewsCnt);
-        }
-
-        // TODO вынести строки сортировки в enum
-        if ("VIEWS".equalsIgnoreCase(sort)) {
-            resultEventShortDtos.sort(Comparator.comparingLong(
-                    eventShortDto -> -1L * Optional.ofNullable(eventShortDto.getViews()).orElse(0L)
-            ));
-        }
-
-        return resultEventShortDtos;
+        return doBusinessLogicAndConvertToDtos(events, publicEventSearchCriteriaDto);
     }
 
     @Override
@@ -113,13 +60,13 @@ public class PublicEventServiceImpl implements PublicEventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EntityNotFoundException("Event not found: " + eventId));
 
-        // Cобытие должно быть опубликовано
+        // Евент должен быть опубликован
         if (event.getState() != EventState.PUBLISHED) {
             throw new EntityNotFoundException("Event not found: " + eventId);
         }
         EventFullDto eventFullDto = eventMapper.toFullDto(event);
 
-        long confirmed = participationRequestRepository.countByEventAndStatus(event, RequestStatus.CONFIRMED);
+        long confirmed = participationRequestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
         eventFullDto.setConfirmedRequests(confirmed);
 
         Map<String, Long> views = statsViewsService.fetchViews(
@@ -132,5 +79,86 @@ public class PublicEventServiceImpl implements PublicEventService {
         eventFullDto.setViews(views.getOrDefault(EVENTS_URL_PREFIX + event.getId(), 0L));
 
         return eventFullDto;
+    }
+
+    private List<Event> doSearch(PublicEventSearchCriteriaDto publicEventSearchCriteriaDto) {
+        // Билдим запрос с критериями по поиску
+        Sort eventsSort;
+        if (EventSort.EVENT_DATE.equals(publicEventSearchCriteriaDto.getSort())) {
+            eventsSort = Sort.by(Sort.Direction.ASC, "eventDate");
+        } else {
+            eventsSort = Sort.unsorted(); // Для другой сортировки сначала нужно получить статистику по эндпоинтам
+        }
+        Pageable pageable = QueryUtils.offsetLimit(
+                publicEventSearchCriteriaDto.getFrom(), publicEventSearchCriteriaDto.getSize(), eventsSort);
+
+        Specification<Event> eventSpecification = EventSpecifications.publicSearch(publicEventSearchCriteriaDto);
+
+        if (Boolean.TRUE.equals(publicEventSearchCriteriaDto.getOnlyAvailable())) {
+            eventSpecification = eventSpecification.and(EventSpecifications.onlyAvailable());
+        }
+
+        // Ищем
+        return eventRepository.findAll(eventSpecification, pageable).getContent();
+    }
+
+    private List<EventShortDto> doBusinessLogicAndConvertToDtos(
+            List<Event> events, PublicEventSearchCriteriaDto publicEventSearchCriteriaDto) {
+        if (events.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Собираем id для batch-запросов
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+        List<String> uris = eventIds.stream()
+                .map(id -> EVENTS_URL_PREFIX + id)
+                .collect(Collectors.toList());
+
+        // Получаем подтверждённые запросы
+        List<EventRequestCount> confirmedRequestsMapList = participationRequestRepository
+                .findRequestsCountByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
+        Map<Long, Long> confirmedRequestsMap = confirmedRequestsMapList.stream()
+                .collect(Collectors.toMap(EventRequestCount::getEventId,EventRequestCount::getRequestCount));
+
+        LocalDateTime periodStart = (publicEventSearchCriteriaDto.getRangeStart() != null) ?
+                publicEventSearchCriteriaDto.getRangeStart() :
+                LocalDateTime.now().minusYears(collectStatsByYearsCnt);
+        LocalDateTime periodEnd = (publicEventSearchCriteriaDto.getRangeEnd() != null) ?
+                publicEventSearchCriteriaDto.getRangeEnd() :
+                LocalDateTime.now();
+
+        // Получаем статистику просмотров
+        Map<String, Long> viewsMap = statsViewsService.fetchViews(periodStart, periodEnd, uris, false);
+
+        List<EventShortDto> result = events.stream()
+                .map(event -> convertToEventShortDto(event, confirmedRequestsMap, viewsMap))
+                .collect(Collectors.toList());
+
+        // Применяем сортировку по просмотрам при необходимости
+        if (EventSort.VIEWS.equals(publicEventSearchCriteriaDto.getSort())) {
+            result.sort(Comparator.comparingLong(
+                    dto -> -1L * Optional.ofNullable(dto.getViews()).orElse(0L)
+            ));
+        }
+
+        return result;
+    }
+
+    private EventShortDto convertToEventShortDto(
+            Event event, Map<Long, Long> confirmedRequestsMap, Map<String, Long> viewsMap) {
+        EventShortDto eventShortDto = eventMapper.toShortDto(event);
+
+        // Устанавливаем подтверждённые запросы
+        Long confirmedRequests = confirmedRequestsMap.getOrDefault(event.getId(), 0L);
+        eventShortDto.setConfirmedRequests(confirmedRequests);
+
+        // Устанавливаем просмотры
+        String eventUri = EVENTS_URL_PREFIX + event.getId();
+        Long views = viewsMap.getOrDefault(eventUri, 0L);
+        eventShortDto.setViews(views);
+
+        return eventShortDto;
     }
 }

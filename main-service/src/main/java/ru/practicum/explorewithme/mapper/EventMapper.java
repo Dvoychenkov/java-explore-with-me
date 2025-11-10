@@ -9,62 +9,67 @@ import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.dto.user.UserShortDto;
 
-// TODO посмотреть на предмет упрощения
+import java.util.List;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface EventMapper {
 
-    @Mapping(target = "category", expression = "java(toCategoryDto(event))")
-    @Mapping(target = "initiator", expression = "java(toUserShortDto(event))")
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "initiator", source = "initiator")
     @Mapping(target = "views", ignore = true)
     EventShortDto toShortDto(Event event);
 
-    @Mapping(target = "category", expression = "java(toCategoryDto(event))")
-    @Mapping(target = "initiator", expression = "java(toUserShortDto(event))")
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "initiator", source = "initiator")
+    @Mapping(target = "location", source = "location")
     @Mapping(target = "state", expression = "java(event.getState().name())")
     @Mapping(target = "views", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
-//    @Mapping(target = "location", ignore = true)
-//    @Mapping(target = "location", expression = "java(toLocationDto(event.getLocation()))")
     EventFullDto toFullDto(Event event);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", expression = "java(category)")
-    @Mapping(target = "initiator", expression = "java(initiator)")
-//    @Mapping(target = "location", ignore = true)
-//    @Mapping(target = "location", expression = "java(toLocationEntity(newEventDto.getLocation()))")
+    @Mapping(target = "category", source = "category")
+    @Mapping(target = "initiator", source = "initiator")
     @Mapping(target = "location", source = "newEventDto.location")
-    @Mapping(target = "state", ignore = true)         // состояние меняем вне маппера
-    @Mapping(target = "createdOn", ignore = true)     // дату-время создания меняем вне маппера
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
-        // дату-время публикации меняем вне маппера
     Event toEntity(NewEventDto newEventDto, User initiator, Category category);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "eventDate", ignore = true) // Дату евента меняем вне маппера
-    @Mapping(target = "category", ignore = true) // категорию меняем вне маппера
-    @Mapping(target = "location", ignore = true)
-        // локацию меняем вне маппера
+    @Mapping(target = "eventDate", ignore = true)
+    @Mapping(target = "category", ignore = true)
     void updateEntity(UpdateEventUserRequest updateEventUserRequest, @MappingTarget Event entity);
 
-    default CategoryDto toCategoryDto(Event event) {
-        if (event.getCategory() == null) {
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "state", ignore = true)
+    @Mapping(target = "createdOn", ignore = true)
+    @Mapping(target = "publishedOn", ignore = true)
+    void updateEntityFromAdminRequest(UpdateEventAdminRequest updateEventAdminRequest, @MappingTarget Event entity);
+
+    List<EventShortDto> toShortDtoList(List<Event> events);
+
+    default CategoryDto toCategoryDto(Category category) {
+        if (category == null) {
             return null;
         }
-
         return CategoryDto.builder()
-                .id(event.getCategory().getId())
-                .name(event.getCategory().getName())
+                .id(category.getId())
+                .name(category.getName())
                 .build();
     }
 
-    default UserShortDto toUserShortDto(Event event) {
-        if (event.getInitiator() == null) {
+    default UserShortDto toUserShortDto(User user) {
+        if (user == null) {
             return null;
         }
-
         return UserShortDto.builder()
-                .id(event.getInitiator().getId())
-                .name(event.getInitiator().getName())
+                .id(user.getId())
+                .name(user.getName())
                 .build();
     }
 
@@ -72,7 +77,6 @@ public interface EventMapper {
         if (location == null) {
             return null;
         }
-
         return LocationDto.builder()
                 .lat(location.getLat())
                 .lon(location.getLon())
@@ -83,20 +87,9 @@ public interface EventMapper {
         if (locationDto == null) {
             return null;
         }
-
         Location location = new Location();
         location.setLat(locationDto.getLat());
         location.setLon(locationDto.getLon());
         return location;
-    }
-
-    @AfterMapping
-    default void fillLocation(Event event, @MappingTarget EventFullDto eventFullDto) {
-        eventFullDto.setLocation(toLocationDto(event.getLocation()));
-    }
-
-    @AfterMapping
-    default void fillLocation(EventFullDto eventFullDto, @MappingTarget Event event) {
-        event.setLocation(toLocationEntity(eventFullDto.getLocation()));
     }
 }

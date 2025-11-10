@@ -40,9 +40,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<UserDto> findAllByIds(List<Long> ids) {
-        return userRepository.findAllById(ids).stream()
-                .map(userMapper::toDto)
-                .toList();
+        List<User> users = userRepository.findAllById(ids);
+        return userMapper.toDtoList(users);
     }
 
     @Transactional(readOnly = true)
@@ -50,10 +49,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     public List<UserDto> findAll(Integer from, Integer size) {
         Sort idAscSort = Sort.by("id").ascending();
         Pageable offsetLimit = QueryUtils.offsetLimit(from, size, idAscSort);
+        List<User> users = userRepository.findAll(offsetLimit).getContent();
+        return userMapper.toDtoList(users);
 
-        return userRepository.findAll(offsetLimit)
-                .map(userMapper::toDto)
-                .getContent();
     }
 
     @Override

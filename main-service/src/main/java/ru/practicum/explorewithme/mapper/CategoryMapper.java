@@ -8,10 +8,14 @@ import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.category.NewCategoryDto;
 import ru.practicum.explorewithme.dto.category.UpdateCategoryRequest;
 
+import java.util.List;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CategoryMapper {
 
     CategoryDto toDto(Category category);
+
+    List<CategoryDto> toDtoList(List<Category> categories);
 
     Category toEntity(NewCategoryDto newCategoryDto);
 

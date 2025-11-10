@@ -1,17 +1,16 @@
 package ru.practicum.explorewithme.web.publicapi;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
+import ru.practicum.explorewithme.dto.event.PublicEventSearchCriteriaDto;
 import ru.practicum.explorewithme.service.publicapi.PublicEventService;
-import ru.practicum.explorewithme.util.DateTimeUtils;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.NewHitDto;
 
@@ -40,34 +39,12 @@ public class PublicEventsController {
 
     @GetMapping
     public List<EventShortDto> getEvents(
-            @RequestParam(name = "text", required = false) String text,
-            @RequestParam(name = "categories", required = false) List<Long> categories,
-            @RequestParam(name = "paid", required = false) Boolean paid,
-            @RequestParam(name = "rangeStart", required = false)
-            @DateTimeFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT) String rangeStart,
-            @RequestParam(name = "rangeEnd", required = false)
-            @DateTimeFormat(pattern = DateTimeUtils.ISO_DATE_TIME_FORMAT) String rangeEnd,
-            @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
-            @RequestParam(name = "sort", required = false) String sort,
-            @RequestParam(name = "from", defaultValue = "0") @Min(0) Integer from,
-            @RequestParam(name = "size", defaultValue = "10") @Min(1) Integer size,
+            @Valid @ModelAttribute PublicEventSearchCriteriaDto publicEventSearchCriteriaDto,
             HttpServletRequest request
     ) {
-        log.info("Public list events - text: {}, categories: {}, paid: {}, rangeStart: {}, rangeEnd: {}, " +
-                        "onlyAvailable: {}, sort: {}, from: {}, size: {}",
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        log.info("Public list events, params => publicEventSearchCriteria: {}", publicEventSearchCriteriaDto);
 
-        // TODO улучшить
-        statsClient.saveHit(NewHitDto.builder()
-                .app(appName)
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now().format(ISO_DATE_TIME_FORMATTER))
-                .build());
-
-        return publicEventService.search(
-                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size
-        );
+        return publicEventService.search(publicEventSearchCriteriaDto);
     }
 
     @GetMapping("/{eventId}")
@@ -75,15 +52,7 @@ public class PublicEventsController {
             @PathVariable("eventId") Long eventId,
             HttpServletRequest request
     ) {
-        log.info("Public get event details by id: {}", eventId);
-
-        // TODO улучшить
-        statsClient.saveHit(NewHitDto.builder()
-                .app(appName)
-                .uri(request.getRequestURI())
-                .ip(request.getRemoteAddr())
-                .timestamp(LocalDateTime.now().format(ISO_DATE_TIME_FORMATTER))
-                .build());
+        log.info("Public event details, params => eventId: {}", eventId);
 
         return publicEventService.getById(eventId);
     }

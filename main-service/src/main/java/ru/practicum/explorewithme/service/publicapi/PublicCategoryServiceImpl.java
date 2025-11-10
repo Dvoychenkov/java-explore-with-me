@@ -27,9 +27,8 @@ public class PublicCategoryServiceImpl implements PublicCategoryService {
         Sort idAscSort = Sort.by("id").ascending();
         Pageable offsetLimit = QueryUtils.offsetLimit(from, size, idAscSort);
 
-        return categoryRepository.findAll(offsetLimit)
-                .map(categoryMapper::toDto)
-                .getContent();
+        List<Category> categories = categoryRepository.findAll(offsetLimit).getContent();
+        return categoryMapper.toDtoList(categories);
     }
 
     @Override
