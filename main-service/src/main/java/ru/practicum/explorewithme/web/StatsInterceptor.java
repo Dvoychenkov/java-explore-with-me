@@ -14,8 +14,6 @@ import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.NewHitDto;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.concurrent.CompletableFuture;
 
 import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
 
@@ -48,20 +46,17 @@ public class StatsInterceptor implements HandlerInterceptor {
                 .timestamp(DateTimeUtils.toString(LocalDateTime.now()))
                 .build();
 
-        sendStatsAsync(hit);
+        sendStats(hit);
     }
 
-    // Асинхронная отправка, чтобы не блокировать основной поток
-    private void sendStatsAsync(NewHitDto hit) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                ResponseEntity<Object> response = statsClient.saveHit(hit);
-                if (!response.getStatusCode().is2xxSuccessful()) {
-                    log.error("Failed to save stats for hit: {}, status: {}", hit, response.getStatusCode());
-                }
-            } catch (Exception e) {
-                log.error("Error saving stats for hit: {}", hit, e);
+    private void sendStats(NewHitDto hit) {
+        try {
+            ResponseEntity<Object> response = statsClient.saveHit(hit);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Failed to save stats for hit: {}, status: {}", hit, response.getStatusCode());
             }
-        });
+        } catch (Exception e) {
+            log.error("Error saving stats for hit: {}", hit, e);
+        }
     }
 }

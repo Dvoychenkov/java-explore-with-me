@@ -10,6 +10,7 @@ import ru.practicum.explorewithme.util.DateTimeUtils;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.ViewStatsDto;
 
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class StatsViewsServiceImpl implements StatsViewsService {
             return Collections.emptyMap();
         }
 
+        DateTimeUtils.validateDateRange(start, end);
         String startStr = DateTimeUtils.toString(start);
         String endStr = DateTimeUtils.toString(end);
 

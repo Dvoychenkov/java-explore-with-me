@@ -13,6 +13,8 @@ import ru.practicum.stats.server.service.StatsService;
 
 import java.util.List;
 
+import static ru.practicum.stats.server.util.DateTimeUtils.ISO_DATE_TIME_FORMAT;
+
 @Slf4j
 @RestController
 @RequestMapping
@@ -30,8 +32,8 @@ public class StatsController {
 
     @GetMapping("/stats")
     public List<ViewStatsDto> getStats(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") String start,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") String end,
+            @RequestParam @DateTimeFormat(pattern = ISO_DATE_TIME_FORMAT) String start,
+            @RequestParam @DateTimeFormat(pattern = ISO_DATE_TIME_FORMAT) String end,
             @RequestParam(required = false) List<String> uris,
             @RequestParam(defaultValue = "false") boolean unique
     ) {

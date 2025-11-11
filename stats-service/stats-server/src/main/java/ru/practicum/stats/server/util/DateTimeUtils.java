@@ -1,4 +1,4 @@
-package ru.practicum.explorewithme.util;
+package ru.practicum.stats.server.util;
 
 import lombok.experimental.UtilityClass;
 

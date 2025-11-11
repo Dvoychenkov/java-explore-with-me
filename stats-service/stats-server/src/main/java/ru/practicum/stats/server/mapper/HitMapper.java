@@ -8,11 +8,12 @@ import ru.practicum.stats.dto.NewHitDto;
 import ru.practicum.stats.dto.HitDto;
 import ru.practicum.stats.server.model.Hit;
 
+import static ru.practicum.stats.server.util.DateTimeUtils.ISO_DATE_TIME_FORMAT;
+
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface HitMapper {
-    String TIMESTAMP_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
-    @Mapping(target = "timestamp", source = "timestamp", dateFormat = TIMESTAMP_PATTERN)
+    @Mapping(target = "timestamp", source = "timestamp", dateFormat = ISO_DATE_TIME_FORMAT)
     @Mapping(target = "id", ignore = true)
     Hit toHit(NewHitDto dto);
 
