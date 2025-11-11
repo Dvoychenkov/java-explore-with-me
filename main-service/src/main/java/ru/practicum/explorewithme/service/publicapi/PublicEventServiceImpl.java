@@ -76,7 +76,7 @@ public class PublicEventServiceImpl implements PublicEventService {
                 true
         );
 
-        eventFullDto.setViews(views.getOrDefault(EVENTS_URL_PREFIX + event.getId(), 0L));
+        eventFullDto.setViews(views.getOrDefault(EVENTS_URL_PREFIX + event.getId(), 1L));
 
         return eventFullDto;
     }
@@ -120,7 +120,7 @@ public class PublicEventServiceImpl implements PublicEventService {
         List<EventRequestCount> confirmedRequestsMapList = participationRequestRepository
                 .findRequestsCountByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
         Map<Long, Long> confirmedRequestsMap = confirmedRequestsMapList.stream()
-                .collect(Collectors.toMap(EventRequestCount::getEventId,EventRequestCount::getRequestCount));
+                .collect(Collectors.toMap(EventRequestCount::getEventId, EventRequestCount::getRequestCount));
 
         LocalDateTime periodStart = (publicEventSearchCriteriaDto.getRangeStart() != null) ?
                 publicEventSearchCriteriaDto.getRangeStart() :
