@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.EventRepository;
@@ -36,7 +37,7 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final ParticipationRequestRepository participationRequestRepository;
     private final EventMapper eventMapper;
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     @Override
     public List<EventFullDto> search(AdminEventSearchCriteriaDto adminEventSearchCriteriaDto) {
         Specification<Event> eventSpecification = EventSpecifications.adminSearch(adminEventSearchCriteriaDto);
