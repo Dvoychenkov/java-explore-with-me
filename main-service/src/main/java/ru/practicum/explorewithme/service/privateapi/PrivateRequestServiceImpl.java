@@ -69,6 +69,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         }
 
         ParticipationRequest saved = participationRequestRepository.save(participationRequest);
+        participationRequestRepository.flush();
         return participationRequestMapper.toDto(saved);
     }
 
@@ -90,6 +91,7 @@ public class PrivateRequestServiceImpl implements PrivateRequestService {
         participationRequest.setStatus(RequestStatus.CANCELED);
 
         ParticipationRequest saved = participationRequestRepository.save(participationRequest);
+        participationRequestRepository.flush();
         return participationRequestMapper.toDto(saved);
     }
 }

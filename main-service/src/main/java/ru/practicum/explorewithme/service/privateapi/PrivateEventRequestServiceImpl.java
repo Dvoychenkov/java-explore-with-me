@@ -104,6 +104,7 @@ public class PrivateEventRequestServiceImpl implements PrivateEventRequestServic
         }
 
         participationRequestRepository.saveAll(participationRequestsToUpdate);
+        participationRequestRepository.flush();
 
         return EventRequestStatusUpdateResult.builder()
                 .confirmedRequests(participationRequestsConfirmedDtos)
