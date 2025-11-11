@@ -14,8 +14,6 @@ import ru.practicum.stats.server.util.DateTimeUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.practicum.stats.server.util.DateTimeUtils.ISO_DATE_TIME_FORMATTER;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor

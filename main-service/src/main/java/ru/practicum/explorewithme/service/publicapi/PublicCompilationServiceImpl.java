@@ -20,7 +20,6 @@ import ru.practicum.explorewithme.stats.StatsViewsService;
 import ru.practicum.explorewithme.util.QueryUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +89,7 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
         List<EventRequestCount> confirmedRequestsMapList = participationRequestRepository
                 .findRequestsCountByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
         Map<Long, Long> confirmedRequestsMap = confirmedRequestsMapList.stream()
-                .collect(Collectors.toMap(EventRequestCount::getEventId,EventRequestCount::getRequestCount));
+                .collect(Collectors.toMap(EventRequestCount::getEventId, EventRequestCount::getRequestCount));
 
         // Получаем статистику просмотров
         Map<String, Long> viewsMap = statsViewsService.fetchViews(

@@ -4,7 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
@@ -23,7 +22,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             "SELECT pr.event.id as eventId, COUNT(pr) as requestCount " +
                     "FROM ParticipationRequest pr " +
                     "WHERE pr.event.id IN :eventIds " +
-                        "AND pr.status = :status " +
+                    "AND pr.status = :status " +
                     "GROUP BY pr.event.id"
     )
     List<EventRequestCount> findRequestsCountByEventIdsAndStatus(List<Long> eventIds, RequestStatus status);

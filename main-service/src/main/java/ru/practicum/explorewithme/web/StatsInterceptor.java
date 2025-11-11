@@ -15,6 +15,7 @@ import ru.practicum.stats.dto.NewHitDto;
 
 import java.time.LocalDateTime;
 
+import static ru.practicum.explorewithme.util.AppConstants.EVENTS_BASE_PATH;
 import static ru.practicum.explorewithme.util.AppConstants.EVENTS_URL_PREFIX;
 
 @Slf4j
@@ -35,7 +36,13 @@ public class StatsInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
 
         // Фильтруем только нужные эндпоинты
-        if (!"GET".equalsIgnoreCase(method) && uri.matches(EVENTS_URL_PREFIX + "\\d+")) {
+        if (!"GET".equalsIgnoreCase(method)) {
+            return;
+        }
+        if (!(uri.equals(EVENTS_BASE_PATH) ||
+                uri.startsWith(EVENTS_URL_PREFIX) ||
+                uri.substring(EVENTS_URL_PREFIX.length()).matches("\\d+"))
+        ) {
             return;
         }
 

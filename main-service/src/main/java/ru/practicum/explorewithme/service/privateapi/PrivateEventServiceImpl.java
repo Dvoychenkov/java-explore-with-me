@@ -12,7 +12,6 @@ import ru.practicum.explorewithme.domain.category.CategoryRepository;
 import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.EventRepository;
 import ru.practicum.explorewithme.domain.event.EventState;
-import ru.practicum.explorewithme.domain.event.Location;
 import ru.practicum.explorewithme.domain.user.User;
 import ru.practicum.explorewithme.domain.user.UserRepository;
 import ru.practicum.explorewithme.dto.event.*;

@@ -10,7 +10,6 @@ import ru.practicum.explorewithme.util.DateTimeUtils;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.ViewStatsDto;
 
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;

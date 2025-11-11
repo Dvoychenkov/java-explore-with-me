@@ -4,20 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
 import ru.practicum.explorewithme.dto.event.PublicEventSearchCriteriaDto;
 import ru.practicum.explorewithme.service.publicapi.PublicEventService;
-import ru.practicum.stats.client.StatsClient;
-import ru.practicum.stats.dto.NewHitDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
-import static ru.practicum.explorewithme.util.DateTimeUtils.ISO_DATE_TIME_FORMATTER;
 
 /*
     Public: События
@@ -30,12 +24,7 @@ import static ru.practicum.explorewithme.util.DateTimeUtils.ISO_DATE_TIME_FORMAT
 @RequiredArgsConstructor
 public class PublicEventsController {
 
-    private final StatsClient statsClient;
     private final PublicEventService publicEventService;
-
-    @Value("${stats-service.app-name}")
-    private String appName;
-
 
     @GetMapping
     public List<EventShortDto> getEvents(
