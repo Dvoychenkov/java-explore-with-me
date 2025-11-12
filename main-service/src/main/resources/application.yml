@@ -23,9 +23,21 @@ spring:
     init:
       mode: always
 
+  # Для обработки даты-времени во входящих параметрах эндпоинтов
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+
 logging:
   level:
     org.hibernate.SQL: DEBUG  # Показывать запросы
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # Параметры запросов
     org.springframework.transaction.interceptor: TRACE  # Транзакции
     org.springframework.orm.jpa: DEBUG  # JPA операции
+    root: INFO
+
+stats-service:
+  url: ${STATS_SERVICE_URL:http://localhost:9090}
+  app-name: ${STATS_SERVICE_APP_NAME:explore-with-me-local}
+  collect-stats-by-years-cnt: 1

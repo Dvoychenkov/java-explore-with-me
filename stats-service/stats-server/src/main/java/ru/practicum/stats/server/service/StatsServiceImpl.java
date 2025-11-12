@@ -3,15 +3,15 @@ package ru.practicum.stats.server.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.stats.dto.NewHitDto;
 import ru.practicum.stats.dto.HitDto;
+import ru.practicum.stats.dto.NewHitDto;
 import ru.practicum.stats.dto.ViewStatsDto;
-import ru.practicum.stats.server.model.Hit;
 import ru.practicum.stats.server.mapper.HitMapper;
+import ru.practicum.stats.server.model.Hit;
 import ru.practicum.stats.server.repository.HitRepository;
+import ru.practicum.stats.server.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
@@ -22,8 +22,6 @@ public class StatsServiceImpl implements StatsService {
     private final HitRepository repo;
     private final HitMapper hitMapper;
 
-    private static final DateTimeFormatter ISO_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     @Override
     public HitDto saveHit(NewHitDto newHitDto) {
         Hit savedHit = repo.save(hitMapper.toHit(newHitDto));
@@ -32,10 +30,12 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+    public List<ViewStatsDto> getStats(String start, String end, List<String> uris, boolean unique) {
 
-        LocalDateTime startDt = LocalDateTime.parse(start, ISO_DATE_TIME_FORMAT);
-        LocalDateTime endDt = LocalDateTime.parse(end, ISO_DATE_TIME_FORMAT);
+        LocalDateTime startDt = DateTimeUtils.fromString(start);
+        LocalDateTime endDt = DateTimeUtils.fromString(end);
+        DateTimeUtils.validateDateRange(startDt, endDt);
+
         List<ViewStatsDto> statsRows;
 
         if (uris != null && !uris.isEmpty()) {

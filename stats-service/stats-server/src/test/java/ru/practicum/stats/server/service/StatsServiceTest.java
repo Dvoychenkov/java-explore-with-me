@@ -9,12 +9,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.stats.dto.NewHitDto;
 import ru.practicum.stats.dto.ViewStatsDto;
-import ru.practicum.stats.server.model.Hit;
 import ru.practicum.stats.server.mapper.HitMapper;
+import ru.practicum.stats.server.model.Hit;
 import ru.practicum.stats.server.repository.HitRepository;
+import ru.practicum.stats.server.util.DateTimeUtils;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +31,6 @@ class StatsServiceTest {
     private final HitMapper hitMapper = Mappers.getMapper(HitMapper.class);
 
     private StatsServiceImpl statsService;
-
-    private static final DateTimeFormatter ISO_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @BeforeEach
     void setUp() {
@@ -57,13 +55,13 @@ class StatsServiceTest {
         assertThat(saved.getApp()).isEqualTo("ewm-main-service");
         assertThat(saved.getUri()).isEqualTo("/events");
         assertThat(saved.getIp()).isEqualTo("127.0.0.1");
-        assertThat(saved.getTimestamp()).isEqualTo(LocalDateTime.parse("2025-11-04 10:00:00", ISO_DATE_TIME_FORMAT));
+        assertThat(saved.getTimestamp()).isEqualTo(DateTimeUtils.fromString("2025-11-04 10:00:00"));
     }
 
     @Test
     void getStats_shouldAggregateWithUris() {
-        LocalDateTime start = LocalDateTime.parse("2025-11-01 00:00:00", ISO_DATE_TIME_FORMAT);
-        LocalDateTime end = LocalDateTime.parse("2025-11-05 00:00:00", ISO_DATE_TIME_FORMAT);
+        LocalDateTime start = DateTimeUtils.fromString("2025-11-01 00:00:00");
+        LocalDateTime end = DateTimeUtils.fromString("2025-11-05 00:00:00");
 
         List<ViewStatsDto> repoResult = Arrays.asList(
                 ViewStatsDto.builder().app("app").uri("/events").hits(5L).build(),
@@ -87,8 +85,8 @@ class StatsServiceTest {
 
     @Test
     void getStats_shouldAggregateUniqueAll() {
-        LocalDateTime start = LocalDateTime.parse("2025-11-01 00:00:00", ISO_DATE_TIME_FORMAT);
-        LocalDateTime end = LocalDateTime.parse("2025-11-05 00:00:00", ISO_DATE_TIME_FORMAT);
+        LocalDateTime start = DateTimeUtils.fromString("2025-11-01 00:00:00");
+        LocalDateTime end = DateTimeUtils.fromString("2025-11-05 00:00:00");
 
         List<ViewStatsDto> repoResult = Collections.singletonList(
                 ViewStatsDto.builder().app("app").uri("/events").hits(3L).build()

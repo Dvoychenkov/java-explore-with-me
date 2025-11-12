@@ -11,5 +11,5 @@ public interface StatsService {
 
     HitDto saveHit(NewHitDto hit);
 
-    List<ViewStatsDto> getStats(String start, String end, @Nullable List<String> uris, Boolean unique);
+    List<ViewStatsDto> getStats(String start, String end, @Nullable List<String> uris, boolean unique);
 }
