@@ -3,7 +3,6 @@ package ru.practicum.explorewithme.mapper;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import ru.practicum.explorewithme.domain.comment.Comment;
-import ru.practicum.explorewithme.domain.comment.CommentStatus;
 import ru.practicum.explorewithme.domain.event.Event;
 import ru.practicum.explorewithme.domain.event.Location;
 import ru.practicum.explorewithme.domain.user.User;
