@@ -47,3 +47,13 @@ create table if not exists participation_requests (
     created      timestamp not null,
     unique (requester_id, event_id)
 );
+
+create table if not exists comments (
+    id               bigserial primary key,
+    event_id         bigint not null references events(id) on delete cascade,
+    author_id        bigint not null references users(id) on delete cascade,
+    text             varchar(2000) not null,
+    created_on       timestamp not null,
+    updated_on       timestamp,
+    status           varchar(16) not null
+);
